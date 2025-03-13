@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Режим "Карточки"</title>
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href={% static 'base/card.css' %} >
+  <link rel="stylesheet" href={% static 'base/css/card.css' %} >
 
 </head>
 <body>
@@ -31,67 +31,68 @@
   <!-- Кнопка для перехода к следующей карточке -->
   <button id="next-btn" class="btn btn-primary">Следующая карточка</button>
   
-  <script>
-    // Получаем данные из контекста. Используем фильтр safe, чтобы вывести валидный JSON.
-    const words = {{ words|safe }};
+ 
+    <script>
+      const words = {{ words|safe }};
     
-    // Преобразуем словарь в массив объектов карточек
-    let cards = [];
-    for (const [front, back] of Object.entries(words)) {
-      cards.push({ front, back });
-    }
-    
-    // Функция перемешивания массива (алгоритм Фишера-Йетса)
-    function shuffle(array) {
-      for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
+      // Преобразуем словарь в массив объектов карточек
+      let cards = [];
+      for (const [front, back] of Object.entries(words)) {
+        cards.push({ front, back });
       }
-      return array;
-    }
-    shuffle(cards);
-    
-    let currentIndex = 0;
-    const flashcard = document.getElementById('flashcard');
-    const cardFront = document.getElementById('card-front');
-    const cardBack = document.getElementById('card-back');
-    const progressEl = document.getElementById('progress');
-    const nextBtn = document.getElementById('next-btn');
-    
-    // Функция для отображения карточки по индексу
-    function showCard(index) {
-      if (index < 0 || index >= cards.length) return;
-      const card = cards[index];
-      cardFront.textContent = card.front;
-      cardBack.textContent = card.back;
-      flashcard.classList.remove('flipped');
-      updateProgress();
-    }
-    
-    // Функция обновления прогресса
-    function updateProgress() {
-      progressEl.textContent = `Карточка ${currentIndex + 1} из ${cards.length}`;
-    }
-    
-    // Переворачиваем карточку при клике
-    flashcard.addEventListener('click', function() {
-      flashcard.classList.toggle('flipped');
-    });
-    
-    // Кнопка "Следующая карточка" переключает карточку
-    nextBtn.addEventListener('click', function() {
-      currentIndex = (currentIndex + 1) % cards.length;
-      showCard(currentIndex);
-    });
-    
-    // Начальное отображение карточки
-    if (cards.length > 0) {
-      showCard(currentIndex);
-    } else {
-      cardFront.textContent = "Нет карточек для отображения";
-      cardBack.textContent = "";
-      progressEl.textContent = "";
-    }
-  </script>
+      
+      // Функция перемешивания массива (алгоритм Фишера-Йетса)
+      function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+      }
+      shuffle(cards);
+      
+      let currentIndex = 0;
+      const flashcard = document.getElementById('flashcard');
+      const cardFront = document.getElementById('card-front');
+      const cardBack = document.getElementById('card-back');
+      const progressEl = document.getElementById('progress');
+      const nextBtn = document.getElementById('next-btn');
+      
+      // Функция для отображения карточки по индексу
+      function showCard(index) {
+        if (index < 0 || index >= cards.length) return;
+        const card = cards[index];
+        cardFront.textContent = card.front;
+        cardBack.textContent = card.back;
+        flashcard.classList.remove('flipped');
+        updateProgress();
+      }
+      
+      // Функция обновления прогресса
+      function updateProgress() {
+        progressEl.textContent = `Карточка ${currentIndex + 1} из ${cards.length}`;
+      }
+      
+      // Переворачиваем карточку при клике
+      flashcard.addEventListener('click', function() {
+        flashcard.classList.toggle('flipped');
+      });
+      
+      // Кнопка "Следующая карточка" переключает карточку
+      nextBtn.addEventListener('click', function() {
+        currentIndex = (currentIndex + 1) % cards.length;
+        showCard(currentIndex);
+      });
+      
+      // Начальное отображение карточки
+      if (cards.length > 0) {
+        showCard(currentIndex);
+      } else {
+        cardFront.textContent = "Нет карточек для отображения";
+        cardBack.textContent = "";
+        progressEl.textContent = "";
+      }
+      </script>
+  
 </body>
 </html>
