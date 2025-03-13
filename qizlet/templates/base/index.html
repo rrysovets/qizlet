@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Главная страница</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <script>
+        function deleteModule(moduleTitle, element) {
+            if (!confirm(`Удалить модуль "${moduleTitle}"?`)) return;
+
+            fetch("{% url 'delete_module' %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": "{{ csrf_token }}"
+                },
+                body: JSON.stringify({ title: moduleTitle })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload(); 
+                } else {
+                    alert("Ошибка удаления модуля.");
+                }
+            })
+            .catch(error => console.error("Ошибка:", error));
+        }
+        let selectedModules = [];
+
+        function toggleButtons() {
+            const checkboxes = document.querySelectorAll('.module-checkbox');
+            const checkedCheckboxes = Array.from(checkboxes).filter(checkbox => checkbox.checked);
+
+            // Проверяем, есть ли хотя бы один выбранный
+            const anyChecked = checkedCheckboxes.length > 0;
+
+            // Показываем или скрываем кнопки в зависимости от состояния чекбоксов
+            document.getElementById('modes-buttons').style.display = anyChecked ? 'block' : 'none';
+
+            // Если выбран только один элемент, показываем кнопку "Редактировать"
+            document.getElementById('edit-button').style.display = checkedCheckboxes.length === 1 ? 'block' : 'none';
+        }
+    </script>
+   
+</head>
+<div class="container mt-4">
+<h1 class="text-center">Список модулей</h1>
+<form method="POST" action="{% url 'index' %}">
+    {% csrf_token %}
+    <div class="list-group">
+        {% for module in modules %}
+            <div class="list-group-item d-flex justify-content-between align-items-center">
+                <!-- Скрытый чекбокс -->
+                <input type="checkbox" class="module-checkbox" name="selected_modules[]" value="{{ module.title }}" id="module-{{ module.id }}" onchange="toggleButtons()">
+                <label for="module-{{ module.id }}" class="w-100">
+                    <span>{{ module.title }}</span>
+                </label>
+                <button class="btn btn-sm" onclick="deleteModule('{{ module.title }}', this)">✖</button>
+            </div>
+        {% endfor %}
+        <a href="{% url 'create_module' %}" class="btn btn-primary btn-block mt-3">Добавить модуль</a>
+    </div>
+
+    <input type="hidden" name="test_type" id="test_type">
+
+        <!-- Кнопки "Карточки" и "Тест" -->
+        <div class="mt-3" id="modes-buttons" style="display: none;">
+            <button type="submit" class="btn btn-primary" onclick="document.getElementById('test_type').value='cards'">Карточки</button>
+            <button type="submit" class="btn btn-primary" onclick="document.getElementById('test_type').value='test'">Тест</button>
+        </div>
+        <div class="mt-3" id="edit-button" style="display: none;">
+            <button type="submit" class="btn btn-primary" onclick="document.getElementById('test_type').value='edit'">Редактировать</button>
+            
+        </div>
+
+</form>
+</div>
+
+</html>
