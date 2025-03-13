@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  {% load static %}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% if module %}Редактировать модуль{% else %}Создать модуль{% endif %}</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <link rel="stylesheet" href={% static 'base/edit.css' %} >
+</head>
+<body>
+  <h1 style="text-align: center;">{% if module %}Редактировать модуль{% else %}Создать модуль{% endif %}</h1>
+  <form method="POST">
+    {% csrf_token %}
+    <label for="id_title">Название модуля:</label>
+    <input type="text" name="title" id="id_title" required value="{% if module %}{{ module.title }}{% endif %}">
+
+    <div id="words-container">
+      {% if module and module.cards %}
+        {% for word, translation in module.cards.items %}
+          <div class="word-pair">
+            <input type="text" name="word" placeholder="Слово на русском" required value="{{ word }}">
+            <input type="text" name="translation" placeholder="Перевод" required value="{{ translation }}">
+            <button type="button" class="remove-word">Удалить</button>
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="word-pair">
+          <input type="text" name="word" placeholder="Слово на русском" required>
+          <input type="text" name="translation" placeholder="Перевод" required>
+          <button type="button" class="remove-word" style="display: none;">Удалить</button>
+        </div>
+      {% endif %}
+    </div>
+        
+    <button type="button" id="add-word">Добавить слово</button>
+        
+    <input type="hidden" name="words" id="words-json">
+    <br><br>
+    <button type="submit">Сохранить</button>
+  </form>
+
+  <script>
+    $(document).ready(function () {
+      // Добавление новой пары слово-перевод
+      $("#add-word").click(function () {
+          let newPair = $('<div class="word-pair">' +
+              '<input type="text" name="word" placeholder="Слово на русском" required>' +
+              '<input type="text" name="translation" placeholder="Перевод" required>' +
+              '<button type="button" class="remove-word">Удалить</button>' +
+              '</div>');
+          $("#words-container").append(newPair);
+      });
+
+      // Удаление пары слово-перевод
+      $(document).on("click", ".remove-word", function () {
+          $(this).parent().remove();
+      });
+
+      // Перед отправкой формы собираем все пары в JSON
+      $("form").submit(function (event) {
+          let words = {};
+          $(".word-pair").each(function () {
+              let word = $(this).find("input[name='word']").val().trim();
+              let translation = $(this).find("input[name='translation']").val().trim();
+              if (word && translation) {
+                  words[word] = translation;
+              }
+          });
+    
+          let wordsJson = JSON.stringify(words);
+          $("#words-json").val(wordsJson);
+    
+          console.log("Отправляем JSON:", wordsJson);
+    
+          if (Object.keys(words).length === 0) {
+              alert("Добавьте хотя бы одну пару слово-перевод!");
+              event.preventDefault();
+          }
+      });
+    });
+  </script>
+</body>
+</html>

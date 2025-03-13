@@ -24,4 +24,6 @@ urlpatterns = [
     path('delete_module',views.delete_module,name = 'delete_module'),
     path('create_module',views.create_module, name='create_module'),
     path('edit_module',views.edit_module, name='edit_module'),
+    path('start_test',views.start_test, name='start_test'),
+    path('view_cards',views.view_cards, name='view_cards'),
 ]

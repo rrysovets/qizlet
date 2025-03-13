@@ -1,0 +1,65 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f7f7f7;
+    padding: 20px;
+    text-align: center;
+  }
+  /* Контейнер для карточки с перспективой для 3D эффекта */
+  .flashcard-container {
+    perspective: 1000px;
+    margin: 0 auto 20px;
+    width: 300px;
+    height: 200px;
+  }
+  /* Карточка, которая переворачивается */
+  .flashcard {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.8s;
+    transform-style: preserve-3d;
+    cursor: pointer;
+  }
+  /* Стороны карточки */
+  .flashcard-side {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    padding: 10px;
+  }
+  /* Лицевая сторона */
+  .flashcard-front {
+    background-color: #fff;
+    color: #333;
+  }
+  /* Оборотная сторона */
+  .flashcard-back {
+    background-color: #007bff;
+    color: #fff;
+    transform: rotateY(180deg);
+  }
+  /* При перевороте карточки применяется класс flipped */
+  .flashcard.flipped {
+    transform: rotateY(180deg);
+  }
+  /* Кнопка "Следующая карточка" */
+  #next-btn {
+    margin-top: 20px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  /* Прогресс обучения */
+  #progress {
+    margin-top: 10px;
+    font-size: 16px;
+    color: #555;
+  }

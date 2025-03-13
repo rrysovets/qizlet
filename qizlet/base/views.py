@@ -6,8 +6,10 @@ import json
 
 
 def index(request: HttpRequest):
+    
     modules = Module.objects.all()  # Получаем все модули из базы данных
     if request.method == "POST":
+        print('index')
         selected_modules = request.POST.getlist('selected_modules[]')
         mode = request.POST.get('test_type')
         
@@ -24,11 +26,12 @@ def index(request: HttpRequest):
     return render(request, "base/index.html", {"modules": modules})
 
 def delete_module(request):
-     if request.method == "POST":
-        data = json.loads(request.body)
-        title = data.get("title")
-        Module.objects.filter(title=title).delete()
-        return JsonResponse({"success": True})
+    print('редактир')
+    if request.method == "POST":
+        
+        id = request.POST['del_id']
+        Module.objects.filter(id=id).delete()
+        return redirect('index')
 
 def create_module(request):
     if request.method == "POST":
@@ -37,15 +40,28 @@ def create_module(request):
         Module.objects.create(title=title, cards=description)
         return redirect("index")
 
-    return render(request, "base/create_module.html")
+    return render(request, "base/edit_module.html")
 
 def edit_module(request: HttpRequest):
-    pass
+    id = request.POST['edit_id']
+    module=Module.objects.get(id=id)
+    
+    return render(request, "base/edit_module.html",context={'module':module})
 
 def view_cards(request: HttpRequest):
-    pass
+    words={}
+    for id in request.POST.getlist('selected_modules'):
+        module=Module.objects.get(id=id)
+        words.update(module.cards)
+    
+    return render(request, "base/card_mode.html",context={'words':words})
 
 def start_test(request: HttpRequest):
-    pass
+    words={}
+    for id in request.POST.getlist('selected_modules'):
+        module=Module.objects.get(id=id)
+        words.update(module.cards)
+    
+    return render(request, "base/test_mode.html",context={'words':words})
         
     
