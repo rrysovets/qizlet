@@ -77,6 +77,20 @@
       flashcard.addEventListener('click', function() {
         flashcard.classList.toggle('flipped');
       });
+      document.addEventListener('keydown', function(event) {
+        if (event.code === 'Space') {  
+            event.preventDefault(); // Чтобы страница не скроллилась вниз
+            flashcard.classList.toggle('flipped');
+        } else if (event.code === 'ArrowRight') { // Стрелка вправо - следующая карточка или начало заново
+            currentIndex = (currentIndex + 1) % cards.length;
+            showCard(currentIndex);
+        } else if (event.code === 'ArrowLeft') { // Стрелка влево - предыдущая карточка (не уходит в конец)
+            if (currentIndex > 0) {
+                currentIndex--;
+                showCard(currentIndex);
+            }
+        }
+    });
       
       // Кнопка "Следующая карточка" переключает карточку
       nextBtn.addEventListener('click', function() {

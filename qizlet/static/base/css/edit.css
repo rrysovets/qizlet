@@ -67,7 +67,7 @@ body {
   .word-pair button.remove-word:hover {
     background-color: #c82333;
   }
-  #add-word {
+  #add-word, #load-json {
     background-color: #28a745;
     color: #fff;
     border: none;

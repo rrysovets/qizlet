@@ -14,19 +14,20 @@
     {% csrf_token %}
     <label for="id_title">Название модуля:</label>
     <input type="text" name="title" id="id_title" required value="{% if module %}{{ module.title }}{% endif %}">
+    <input type="hidden" name="id" value={{ module.id }} />
 
     <div id="words-container">
       {% if module and module.cards %}
         {% for word, translation in module.cards.items %}
           <div class="word-pair">
-            <input type="text" name="word" placeholder="Слово на русском" required value="{{ word }}">
+            <input type="text" name="word" placeholder="слово на английском" required value="{{ word }}">
             <input type="text" name="translation" placeholder="Перевод" required value="{{ translation }}">
             <button type="button" class="remove-word">Удалить</button>
           </div>
         {% endfor %}
       {% else %}
         <div class="word-pair">
-          <input type="text" name="word" placeholder="Слово на русском" required>
+          <input type="text" name="word" placeholder="слово на английском" required>
           <input type="text" name="translation" placeholder="Перевод" required>
           <button type="button" class="remove-word" style="display: none;">Удалить</button>
         </div>
@@ -36,6 +37,8 @@
     <button type="button" id="add-word">Добавить слово</button>
         
     <input type="hidden" name="words" id="words-json">
+    <button type="button" id="load-json">Загрузить JSON</button>
+    <input type="file" id="json-upload" accept=".json" style="display: none;">
     <br><br>
     <button type="submit">Сохранить</button>
   </form>
@@ -45,7 +48,7 @@
       // Добавление новой пары слово-перевод
       $("#add-word").click(function () {
           let newPair = $('<div class="word-pair">' +
-              '<input type="text" name="word" placeholder="Слово на русском" required>' +
+              '<input type="text" name="word" placeholder="слово на английском" required>' +
               '<input type="text" name="translation" placeholder="Перевод" required>' +
               '<button type="button" class="remove-word">Удалить</button>' +
               '</div>');
@@ -79,6 +82,46 @@
           }
       });
     });
+    $("#load-json").click(function () {
+      $("#json-upload").click(); // Открываем выбор файла
+  });
+  
+  $("#json-upload").change(function () {
+      let file = this.files[0];
+      if (!file) return;
+  
+      let reader = new FileReader();
+      reader.onload = function (event) {
+          try {
+              let jsonData = JSON.parse(event.target.result);
+              if (typeof jsonData !== "object") {
+                  alert("Некорректный формат JSON!");
+                  return;
+              }
+  
+              
+  
+              for (let eng in jsonData) {
+                  let rus = jsonData[eng];
+                  let newPair = $(`
+                      <div class="word-pair">
+                          <input type="text" name="word" value="${eng}" placeholder="слово на английском" required>
+                          <input type="text" name="translation" value="${rus}" placeholder="Перевод" required>
+                          <button type="button" class="remove-word">Удалить</button>
+                      </div>
+                  `);
+                  $("#words-container").append(newPair);
+              }
+          } catch (error) {
+              alert("Ошибка обработки JSON!");
+          }
+  
+          // Очищаем поле выбора файла, чтобы можно было загрузить тот же файл снова
+          $("#json-upload").val("");
+      };
+  
+      reader.readAsText(file);
+  });
   </script>
 </body>
 </html>

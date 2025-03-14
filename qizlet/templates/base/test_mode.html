@@ -6,18 +6,191 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Режим "Карточки" - Тестирование</title>
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="{% static "base/css/test.css" %}" type="text/css">
+  <link rel="stylesheet" href="{% static 'base/css/test.css' %}" type="text/css">
+  <style>
+    /* Общие стили */
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f7f7f7;
+      padding: 20px;
+      text-align: center;
+    }
+    h1, h2 {
+      margin-bottom: 20px;
+    }
+    /* Панель выбора вариантов тестирования */
+    #mode-selection {
+      margin-bottom: 30px;
+    }
+    #mode-selection label {
+      display: inline-block;
+      margin: 0 10px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #mode-selection input[type="checkbox"] {
+      margin-right: 5px;
+    }
+    #mode-selection button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      font-size: 16px;
+    }
+    /* Выбор количества вопросов через числовой ввод */
+    #question-count-container {
+      margin-top: 15px;
+    }
+    #question-count {
+      width: 80px;
+      padding: 5px;
+      font-size: 16px;
+      text-align: center;
+    }
+    /* Прогресс */
+    #progress {
+      margin-bottom: 20px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    /* Контейнер карточки */
+    .flashcard-container {
+      perspective: 1000px;
+      margin: 20px auto;
+      width: 300px;
+      height: 200px;
+    }
+    .flashcard {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.8s;
+      transform-style: preserve-3d;
+      cursor: pointer;
+    }
+    .flashcard.flipped {
+      transform: rotateY(180deg);
+    }
+    .flashcard-side {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      padding: 10px;
+    }
+    .flashcard-front {
+      background-color: #fff;
+      color: #333;
+    }
+    .flashcard-back {
+      background-color: #007bff;
+      color: #fff;
+      transform: rotateY(180deg);
+    }
+    /* Вариант 1: Multiple Choice */
+    .options {
+      margin: 15px 0;
+      text-align: center;
+    }
+    .options button {
+      margin: 5px;
+      padding: 8px 12px;
+      font-size: 16px;
+    }
+    /* Вариант 2: Free text (объединённый режим) */
+    .free-text-test {
+      margin: 15px 0;
+      text-align: center;
+    }
+    .free-text-test input[type="text"] {
+      width: 80%;
+      padding: 8px;
+      font-size: 18px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      margin-bottom: 10px;
+    }
+    .free-text-test button {
+      padding: 8px 15px;
+      font-size: 16px;
+    }
+    /* Вариант 3: Matching */
+    .matching-test {
+      margin: 20px auto;
+      max-width: 600px;
+      text-align: center;
+    }
+    .matching-test .column {
+      display: inline-block;
+      vertical-align: top;
+      width: 45%;
+      margin: 0 2%;
+    }
+    .matching-test ul {
+      list-style: none;
+      padding: 0;
+    }
+    .matching-test li {
+      padding: 8px;
+      border: 1px solid #ddd;
+      margin-bottom: 8px;
+      border-radius: 4px;
+      background-color: #fff;
+    }
+    .matching-test select {
+      width: 100%;
+      padding: 6px;
+      margin-top: 5px;
+      font-size: 16px;
+    }
+    /* Вариант 4: True/False */
+    .true-false-test {
+      margin: 20px 0;
+      text-align: center;
+    }
+    .true-false-test button {
+      margin: 0 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+    }
+    /* Общие кнопки навигации */
+    .btn-nav {
+      margin-top: 20px;
+    }
+    /* Сообщение результата */
+    #result-message {
+      margin-top: 15px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    /* Статистика */
+    #stats {
+      margin-top: 30px;
+      font-size: 20px;
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body>
   <h1>Режим "Карточки" - Тестирование</h1>
   
-  <!-- Панель выбора вариантов тестирования -->
+  <!-- Панель выбора вариантов тестирования и количества вопросов -->
   <div id="mode-selection">
     <h2>Выберите варианты тестов</h2>
     <label><input type="checkbox" name="variants" value="1"> Вариант 1: Выбор ответа</label>
     <label><input type="checkbox" name="variants" value="2"> Вариант 2: Ввод ответа</label>
     <label><input type="checkbox" name="variants" value="3"> Вариант 3: Соединение пар</label>
     <label><input type="checkbox" name="variants" value="4"> Вариант 4: Правда/Ложь</label>
+    <div id="question-count-container">
+      <label for="question-count">Количество вопросов:</label>
+      <input type="number" id="question-count" value="10" min="1" style="text-align:center;">
+    </div>
     <br>
     <button id="start-test" class="btn btn-primary">Начать тест</button>
   </div>
@@ -46,16 +219,16 @@
       </div>
     </div>
     
-    <!-- Вариант 3: Matching (обёрнут в форму) -->
+    <!-- Вариант 3: Matching -->
     <div id="variant-3" class="test-variant" style="display: none;">
       <form id="matching-form">
         <div class="matching-test">
           <div class="column" id="matching-words">
-            <h4>Слово</h4>
+            <h4>Слова</h4>
             <ul id="words-list"></ul>
           </div>
           <div class="column" id="matching-translations">
-            <h4>Перевод</h4>
+            <h4>Переводы</h4>
             <ul id="translations-list"></ul>
           </div>
         </div>
@@ -65,14 +238,9 @@
     
     <!-- Вариант 4: True/False -->
     <div id="variant-4" class="test-variant" style="display: none;">
-      <!-- Используем общий контейнер flashcard для отображения вопроса -->
       <div class="true-false-test">
-        {% comment %} <div id="tf-display" class="flashcard-container" style="margin: 0 auto 20px; width:300px; height:200px;">
-          <div id="flashcard-tf" class="flashcard">
-            <div class="flashcard-side flashcard-front" id="tf-front"></div>
-            <div class="flashcard-side flashcard-back" id="tf-back"></div>
-          </div>
-        </div> {% endcomment %}
+        <!-- Используем общий flashcard для отображения вопроса с увеличенным шрифтом -->
+
         <div class="options">
           <button class="btn btn-success tf-option" data-answer="true">Правда</button>
           <button class="btn btn-danger tf-option" data-answer="false">Ложь</button>
@@ -111,7 +279,7 @@
     
     let currentIndex = 0;
     let correctCount = 0;
-    const totalCount = cards.length;
+    let totalCount = 0;
     let chosenVariants = [];
     // Флаг для объединённого режима 2
     let isInverted = false;
@@ -131,9 +299,20 @@
         alert("Выберите хотя бы один вариант теста!");
         return;
       }
+      // Выбор количества вопросов
+      let qCount = $('#question-count').val();
+      if(qCount === "" || qCount <= 0) {
+        alert("Введите корректное количество вопросов!");
+        return;
+      }
+      if(qCount !== "all") {
+        qCount = parseInt(qCount);
+        cards = shuffle(cards).slice(0, qCount);
+      }
+      totalCount = cards.length;
+      
       $('#mode-selection').hide();
       $('#test-container').show();
-      // Если выбран режим 3, скрываем общий flashcard, иначе показываем его
       if(chosenVariants.includes('3')) {
         $('#card-container').hide();
       } else {
@@ -154,7 +333,7 @@
     function loadCurrentCard() {
       $('#result-message').empty();
       $('#next-btn').hide();
-      // Если вариант не Matching, скрываем общий flashcard
+      // Если не режим 3, скрываем обратную сторону карточки
       if (!chosenVariants.includes('3')) {
         $('#card-back').hide();
       }
@@ -165,24 +344,27 @@
       updateProgress();
       const card = cards[currentIndex];
       
-      // Определяем вариант
+      // Если выбран режим 3 Matching, обрабатываем отдельно
       let variant = getRandomVariant();
-      // Если выбран режим 2, используем объединённый режим
-      if (variant === '2') {
-        isInverted = Math.random() < 0.5;
-        variant = '2';
-      }
-      // Скрываем все варианты интерфейса
-      $('.test-variant').hide();
-      
-      if (variant === '1') {
-        // Вариант 1: Multiple Choice
+      if (variant === '3') {
+        $('#card-container').hide();
+        generateMatchingTest();
+        $('.test-variant').hide();
+        $('#variant-3').show();
+        return;
+      } else {
         $('#card-container').show();
+      }
+      
+      // Для вариантов 1,2,4 используем общий flashcard
+      if (variant === '1') {
+        $('#card-front').text(card.front);
         generateMCOptions(card);
+        $('.test-variant').hide();
         $('#variant-1').show();
       } else if (variant === '2') {
-        // Вариант 2: Free text (объединённый)
-        $('#card-container').show();
+        isInverted = Math.random() < 0.5;
+        $('.test-variant').hide();
         if (isInverted) {
           $('#ft-input').attr('placeholder', 'Введите слово');
           $('#card-front').text(card.back);
@@ -194,13 +376,8 @@
         }
         $('#variant-2').show();
         $('#ft-input').val('');
-      } else if (variant === '3') {
-        // Вариант 3: Matching
-        generateMatchingTest();
-        $('#variant-3').show();
       } else if (variant === '4') {
-        // Вариант 4: True/False - используем общий flashcard
-        $('#card-container').show();
+        $('.test-variant').hide();
         generateTFQuestion(card);
         $('#variant-4').show();
       }
@@ -246,18 +423,27 @@
       // Очистка списков
       $('#words-list').empty();
       $('#translations-list').empty();
-      // Собираем переводы
+      // Собираем переводы из выбранных карточек
       let translations = selected.map(item => item.back);
       shuffle(translations);
       // Заполняем левую колонку словами
       selected.forEach(item => {
         $('#words-list').append(`<li style="font-size:24px; margin-bottom:10px;">${item.front}</li>`);
       });
-      // Для каждой карточки создаем select со всеми вариантами переводов
+      // Для каждой карточки создаём select с 4 вариантами перевода
       selected.forEach(item => {
         let optionsHtml = `<select class="matching-select form-control" data-correct="${item.back}" style="margin-bottom:10px; font-size:16px;">`;
         optionsHtml += `<option value="">Выберите перевод</option>`;
-        translations.forEach(trans => {
+        // Собираем 4 уникальных варианта перевода
+        let opts = translations.slice();
+        while (opts.length < 4 && opts.length < totalCount) {
+          let randomOpt = cards[Math.floor(Math.random() * totalCount)].back;
+          if (!opts.includes(randomOpt)) {
+            opts.push(randomOpt);
+          }
+        }
+        shuffle(opts);
+        opts.slice(0, 4).forEach(trans => {
           optionsHtml += `<option value="${trans}">${trans}</option>`;
         });
         optionsHtml += `</select>`;
@@ -275,11 +461,11 @@
           wrong = cards[Math.floor(Math.random() * totalCount)].back;
         }
         $('#card-front').text(`${card.front} → ${wrong}`);
-        $('#card-back').text(`Правильный ответ: ${card.back}`);
+        $('#card-back').text(`Правильный ответ: ${card.back}`).show();
         $('#flashcard').data('correct', "false");
       } else {
         $('#card-front').text(`${card.front} → ${card.back}`);
-        $('#card-back').text(``);
+        $('#card-back').text(``).hide();
         $('#flashcard').data('correct', "true");
       }
       $('#card-front').css('font-size', '28px');
@@ -351,7 +537,7 @@
     // Обработка для True/False (Вариант 4)
     $(document).on('click', '.tf-option', function() {
       $('#card-back').fadeIn();
-      const userAnswer = $(this).data('answer'); // "true" or "false"
+      const userAnswer = $(this).data('answer'); // "true" или "false"
       const correct = $('#flashcard').data('correct');
       let message = '';
       if(userAnswer.toString() === correct.toString()){
@@ -398,7 +584,7 @@
       updateProgress();
       const card = cards[currentIndex];
       
-      // Если выбран режим 3 Matching, скрываем общий flashcard
+      // Если выбран режим 3 Matching, обрабатываем отдельно
       let variant = getRandomVariant();
       if (variant === '3') {
         $('#card-container').hide();
@@ -412,6 +598,7 @@
       
       // Для вариантов 1,2,4 используем общий flashcard
       if (variant === '1') {
+        $('#card-front').text(card.front);
         generateMCOptions(card);
         $('.test-variant').hide();
         $('#variant-1').show();
@@ -430,7 +617,6 @@
         $('#variant-2').show();
         $('#ft-input').val('');
       } else if (variant === '4') {
-        
         $('.test-variant').hide();
         generateTFQuestion(card);
         $('#variant-4').show();
@@ -442,7 +628,31 @@
       return chosenVariants[Math.floor(Math.random() * chosenVariants.length)];
     }
     
-    // Событие кнопки "Начать тест"
+    // --- Обработка нажатий клавиш ---
+    $(document).keydown(function(e) {
+      // Если тест не показан или фокус на input, игнорируем
+      if (!$('#test-container').is(':visible') || $(e.target).is('input')) return;
+      
+      switch(e.keyCode) {
+
+        case 37: // Стрелка влево
+          if (currentIndex > 0) {
+            currentIndex--;
+            loadCurrentCard();
+          }
+          break;
+        case 39: // Стрелка вправо
+          if (currentIndex < totalCount - 1) {
+            currentIndex++;
+            loadCurrentCard();
+          }
+          break;
+        default:
+          break;
+      }
+    });
+    
+    // Событие кнопки "Начать тест" для выбора режимов
     $('#start-test').click(function() {
       chosenVariants = [];
       $('input[name="variants"]:checked').each(function() {
@@ -452,9 +662,20 @@
         alert("Выберите хотя бы один вариант теста!");
         return;
       }
+      // Получаем количество вопросов из поля ввода
+      let qCount = $('#question-count').val();
+      if(qCount === "" || qCount <= 0) {
+        alert("Введите корректное количество вопросов!");
+        return;
+      }
+      if(qCount !== "all") {
+        qCount = parseInt(qCount);
+        cards = shuffle(cards).slice(0, qCount);
+      }
+      totalCount = cards.length;
+      
       $('#mode-selection').hide();
       $('#test-container').show();
-      // Если режим Matching выбран, скрываем общий flashcard
       if(chosenVariants.includes('3')) {
         $('#card-container').hide();
       } else {

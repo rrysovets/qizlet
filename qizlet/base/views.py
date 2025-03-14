@@ -43,10 +43,18 @@ def create_module(request):
     return render(request, "base/edit_module.html")
 
 def edit_module(request: HttpRequest):
-    id = request.POST['edit_id']
-    module=Module.objects.get(id=id)
+    if request.POST.get('edit_id'):
+        id = request.POST['edit_id']
+        module=Module.objects.get(id=id)
+        return render(request, "base/edit_module.html",context={'module':module})
+    else:
+        id = request.POST.get("id")
+        title = request.POST.get("title")
+        cards=json.loads(request.POST.get("words"))
+        Module.objects.filter(id=id).update(cards=cards,title=title)
+        return redirect("index")
     
-    return render(request, "base/edit_module.html",context={'module':module})
+    
 
 def view_cards(request: HttpRequest):
     words={}
